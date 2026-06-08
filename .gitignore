@@ -1,0 +1,10 @@
+/target
+/.botdock
+/.notes
+/.claude
+
+# example
+/examples/hello/*
+!/examples/hello/.opp
+
+/docs/paper

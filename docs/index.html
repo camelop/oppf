@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OPPF — Open-Prompt Project Format</title>
+  <meta name="description" content="OPPF distributes software as reproducible prompts: a directory described entirely by its design, acceptance criteria, and tests, so a coding agent can regenerate it. opp is the reference CLI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top">
+      <span class="brand-badge">opp</span>
+      <span class="brand-name">OPPF</span>
+    </a>
+    <nav class="site-nav">
+      <a href="#what">What</a>
+      <a href="#lifecycle">Lifecycle</a>
+      <a href="#layout">Layout</a>
+      <a href="#cli">CLI</a>
+      <a href="#start">Quick start</a>
+      <a class="nav-paper" href="paper.pdf" target="_blank" rel="noopener">Paper&nbsp;↗</a>
+    </nav>
+  </header>
+
+  <main id="top">
+
+    <!-- HERO -->
+    <section class="hero">
+      <p class="eyebrow">Open-Prompt Project Format</p>
+      <h1>Ship software as <span class="accent">reproducible prompts</span>,<br />not just source.</h1>
+      <p class="lede">
+        Open source shares the <em>result</em>. <strong>OPPF</strong> shares what produced it —
+        the design prompts, the acceptance criteria, and the tests — so a generative coding
+        agent can regenerate the whole project, with an explicit, checkable definition of done.
+      </p>
+      <div class="hero-actions">
+        <a class="btn primary" href="#start">Get started</a>
+        <a class="btn ghost" href="#lifecycle">See the lifecycle</a>
+      </div>
+
+      <div class="terminal" aria-hidden="true">
+        <div class="terminal-bar"><span></span><span></span><span></span></div>
+        <pre class="terminal-body"><code><span class="c-dim">$</span> <span class="c-cmd">opp impl</span>
+<span class="c-badge">opp</span> <span class="c-ok">✓</span> claude-code — logged in
+<span class="c-badge">opp</span> implementing . with claude-code
+<span class="c-frame">╭─</span> <span class="c-strong">claude-code</span> <span class="c-dim">· pid 1278707</span>
+<span class="c-frame">│</span> <span class="c-dim">session b93a131b-…</span>
+<span class="c-frame">│</span>  <span class="c-num">1</span> <span class="c-strong">Read</span> <span class="c-dim">.opp/design.md</span>
+<span class="c-frame">│</span>  <span class="c-num">2</span> <span class="c-strong">Write</span> <span class="c-dim">hello.sh</span>
+<span class="c-frame">│</span>  <span class="c-num">3</span> <span class="c-strong">Bash</span> <span class="c-dim">bash hello.sh</span>
+<span class="c-frame">│</span>
+<span class="c-frame">│</span> <span class="c-bar">▌</span> Done — implemented hello.sh per the design.
+<span class="c-frame">╰─</span> <span class="c-dim">done in 12s · 3 steps</span></code></pre>
+      </div>
+    </section>
+
+    <!-- WHAT -->
+    <section id="what" class="band">
+      <h2>What is OPPF?</h2>
+      <p class="section-lede">
+        A standard for a project directory whose full contents can be reproduced by an AI.
+        Everything the agent needs lives in one folder, <code>.opp/</code>, split into three roles:
+      </p>
+      <div class="cards three">
+        <article class="card">
+          <div class="card-icon">✦</div>
+          <h3>Design</h3>
+          <p>The prompts that specify the project — the <strong>single source of truth</strong>. Either <code>design/index.md</code> or a single <code>design.md</code>.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">✓</div>
+          <h3>Review</h3>
+          <p>One file per acceptance property. The agent reads each and returns a strict <strong>pass / fail</strong> verdict. Optional.</p>
+        </article>
+        <article class="card">
+          <div class="card-icon">▶</div>
+          <h3>Test</h3>
+          <p>A runnable <code>test.sh</code> suite that validates the implementation. Run after review. Optional.</p>
+        </article>
+      </div>
+    </section>
+
+    <!-- LIFECYCLE -->
+    <section id="lifecycle" class="band alt">
+      <h2>The lifecycle</h2>
+      <p class="section-lede">
+        <code>opp</code> drives a coding agent through three commands. Prompts go in; a working,
+        verified implementation comes out.
+      </p>
+
+      <div class="diagram">
+        <svg viewBox="0 0 920 360" role="img" aria-label="OPPF lifecycle flow: the .opp specification feeds opp impl, opp review, and opp test, all driven by a coding agent, producing a verified implementation.">
+          <defs>
+            <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L8,3 L0,6 Z" fill="#94a3b8" />
+            </marker>
+            <marker id="arrow-accent" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+              <path d="M0,0 L8,3 L0,6 Z" fill="#0891b2" />
+            </marker>
+          </defs>
+
+          <!-- spec source -->
+          <g class="node spec">
+            <rect x="20" y="120" width="170" height="120" rx="14" />
+            <text class="n-title" x="105" y="158" text-anchor="middle">.opp/</text>
+            <text class="n-line" x="105" y="184" text-anchor="middle">design · review · test</text>
+            <text class="n-sub" x="105" y="210" text-anchor="middle">prompts = source</text>
+          </g>
+
+          <!-- arrow spec -> impl -->
+          <line x1="190" y1="180" x2="250" y2="180" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+
+          <!-- impl -->
+          <g class="node step">
+            <rect x="252" y="130" width="180" height="100" rx="14" />
+            <text class="n-cmd" x="342" y="168" text-anchor="middle">opp impl</text>
+            <text class="n-sub" x="342" y="194" text-anchor="middle">generate the code</text>
+          </g>
+
+          <!-- arrow impl -> review -->
+          <line x1="432" y1="180" x2="492" y2="180" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+
+          <!-- review -->
+          <g class="node step">
+            <rect x="494" y="130" width="180" height="100" rx="14" />
+            <text class="n-cmd" x="584" y="168" text-anchor="middle">opp review</text>
+            <text class="n-sub" x="584" y="194" text-anchor="middle">check each property</text>
+          </g>
+
+          <!-- arrow review -> test -->
+          <line x1="674" y1="180" x2="734" y2="180" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)" />
+
+          <!-- test -->
+          <g class="node step">
+            <rect x="736" y="130" width="164" height="100" rx="14" />
+            <text class="n-cmd" x="818" y="168" text-anchor="middle">opp test</text>
+            <text class="n-sub" x="818" y="194" text-anchor="middle">run the suite</text>
+          </g>
+
+          <!-- agent band -->
+          <g class="agent">
+            <rect x="252" y="290" width="648" height="50" rx="12" />
+            <text x="576" y="320" text-anchor="middle">coding agent &nbsp;·&nbsp; Claude Code / Codex</text>
+          </g>
+          <!-- agent connectors -->
+          <line x1="342" y1="290" x2="342" y2="232" stroke="#0891b2" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-accent)" />
+          <line x1="584" y1="290" x2="584" y2="232" stroke="#0891b2" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-accent)" />
+          <line x1="818" y1="290" x2="818" y2="232" stroke="#0891b2" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrow-accent)" />
+
+          <!-- feedback loop: review -> impl -->
+          <path d="M584 130 C 584 70, 342 70, 342 128" fill="none" stroke="#cbd5e1" stroke-width="1.6" stroke-dasharray="5 5" marker-end="url(#arrow)" />
+          <text class="loop-label" x="463" y="62" text-anchor="middle">iterate on failure</text>
+        </svg>
+      </div>
+
+      <p class="diagram-caption">
+        The <span class="tag">design</span> drives <span class="mono">impl</span>; <span class="mono">review</span> and
+        <span class="mono">test</span> form the explicit definition of done. A failed verdict feeds back into another
+        <span class="mono">impl</span> round — in the same agent session.
+      </p>
+    </section>
+
+    <!-- LAYOUT -->
+    <section id="layout" class="band">
+      <h2>Project layout</h2>
+      <p class="section-lede">A conforming project is any directory containing an <code>.opp/</code> folder.</p>
+      <div class="layout-grid">
+        <pre class="tree"><code><span class="t-dir">.opp/</span>
+<span class="t-line">├─</span> <span class="t-dir">design/</span>
+<span class="t-line">│  └─</span> <span class="t-file">index.md</span>        <span class="t-cmt"># the design — source of truth</span>
+<span class="t-line">├─</span> <span class="t-file">config.toml</span>        <span class="t-cmt"># agent + excludes (optional)</span>
+<span class="t-line">├─</span> <span class="t-dir">review/</span>            <span class="t-cmt"># pass/fail criteria (optional)</span>
+<span class="t-line">│  ├─</span> <span class="t-file">property_a.md</span>
+<span class="t-line">│  └─</span> <span class="t-file">property_b.md</span>
+<span class="t-line">└─</span> <span class="t-dir">test/</span>              <span class="t-cmt"># runnable suite (optional)</span>
+<span class="t-line">   └─</span> <span class="t-file">test.sh</span>
+<span class="t-file">…implementation files</span>      <span class="t-cmt"># what the agent generates</span></code></pre>
+        <div class="layout-notes">
+          <h3>Good to know</h3>
+          <ul>
+            <li>A single <code>design.md</code> may replace the <code>design/</code> folder.</li>
+            <li><code>review/</code> and <code>test/</code> are optional — start with just a design.</li>
+            <li>A test bundle can itself be an OPPF project (it's recursive).</li>
+            <li><code>config.toml</code> picks the <code>agent</code> and lists read-only <code>exclude</code> paths.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- CLI -->
+    <section id="cli" class="band alt">
+      <h2>The <code>opp</code> CLI</h2>
+      <p class="section-lede">A small Rust binary. It checks you're logged in, drives the agent with live progress, and reports results.</p>
+      <div class="cards three">
+        <article class="card cmd">
+          <code class="cmd-name">opp impl</code>
+          <p>Read the design and implement what it requires, streaming the agent's actions as it works.</p>
+        </article>
+        <article class="card cmd">
+          <code class="cmd-name">opp review</code>
+          <p>Have the agent check every property and print a <strong>pass / fail</strong> verdict for each.</p>
+        </article>
+        <article class="card cmd">
+          <code class="cmd-name">opp test</code>
+          <p>Run the bundled <code>test.sh</code> suite and report whether it passed.</p>
+        </article>
+      </div>
+      <div class="agent-pills">
+        <span class="pill">Pluggable agents</span>
+        <span class="pill alt">Claude Code</span>
+        <span class="pill alt">Codex</span>
+        <span class="pill">login preflight</span>
+        <span class="pill">live progress</span>
+        <span class="pill">resumable sessions</span>
+      </div>
+    </section>
+
+    <!-- QUICK START -->
+    <section id="start" class="band">
+      <h2>Quick start</h2>
+      <div class="layout-grid">
+        <pre class="terminal-body plain"><code><span class="c-dim"># build the CLI</span>
+<span class="c-cmd">cargo build --release</span>
+
+<span class="c-dim"># inside a project that has an .opp/ folder</span>
+<span class="c-cmd">opp impl</span>     <span class="c-dim"># generate the implementation</span>
+<span class="c-cmd">opp review</span>   <span class="c-dim"># check each acceptance property</span>
+<span class="c-cmd">opp test</span>     <span class="c-dim"># run the test suite</span>
+
+<span class="c-dim"># preview the agent calls without running them</span>
+<span class="c-cmd">opp --dry-run impl</span></code></pre>
+        <div class="layout-notes">
+          <h3>Requirements</h3>
+          <ul>
+            <li>A <a href="https://rustup.rs">Rust</a> toolchain to build <code>opp</code>.</li>
+            <li>A coding-agent CLI on your <code>PATH</code> — <code>claude</code> or <code>codex</code>.</li>
+            <li>That's it. Point <code>opp</code> at any <code>.opp/</code> project and go.</li>
+          </ul>
+          <p class="note">The full spec lives in the repo's <code>.notes/guidelines.md</code>; usage details are in the <code>README</code>.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="brand">
+      <span class="brand-badge">opp</span>
+      <span class="brand-name">OPPF</span>
+    </div>
+    <p>Open-Prompt Project Format · reference CLI in Rust · MIT licensed.</p>
+  </footer>
+
+</body>
+</html>
