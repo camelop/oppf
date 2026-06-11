@@ -5,6 +5,7 @@ pub mod discuss;
 pub mod impl_cmd;
 pub mod review;
 pub mod test;
+pub mod upgrade;
 
 use anyhow::Result;
 

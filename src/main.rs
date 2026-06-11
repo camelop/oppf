@@ -64,6 +64,8 @@ enum Commands {
         #[arg(long, short = 'y')]
         yes: bool,
     },
+    /// Update `opp` itself to the latest release (runs the install script).
+    Upgrade,
     /// Read the design and discuss implementation uncertainties before coding.
     Discuss {
         /// Lowest severity to include: `blocking`, `major`, or `all`.
@@ -108,6 +110,11 @@ fn main() {
 }
 
 fn run(cli: Cli) -> anyhow::Result<i32> {
+    // `upgrade` updates the binary itself; it needs no project or agent.
+    if let Commands::Upgrade = cli.command {
+        return commands::upgrade::run(cli.dry_run);
+    }
+
     let project = Project::discover(cli.path.as_deref())?;
     let agent_id = cli
         .agent
@@ -127,5 +134,6 @@ fn run(cli: Cli) -> anyhow::Result<i32> {
         Commands::Test => commands::test::run(&ctx),
         Commands::Clear { yes } => commands::clear::run(&ctx, yes),
         Commands::Discuss { level, output } => commands::discuss::run(&ctx, level.as_str(), output),
+        Commands::Upgrade => unreachable!("handled before project discovery"),
     }
 }

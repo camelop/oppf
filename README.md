@@ -18,6 +18,7 @@ and drives a coding agent through the project lifecycle:
   is written.
 - **`opp clear`** — remove all generated files, reverting to the pre-generation
   state (keeps `.opp/`, `.git/`, and excluded paths).
+- **`opp upgrade`** — update `opp` itself to the latest release.
 
 > The format itself is specified in [`.notes/guidelines.md`](.notes/guidelines.md).
 
@@ -206,6 +207,13 @@ release, or to no-op when you are already up to date. It downloads a prebuilt
 binary for your platform (Linux/macOS) from the
 [GitHub Releases](https://github.com/camelop/oppf/releases) and verifies its
 SHA-256 checksum.
+
+Once installed, `opp upgrade` self-updates in place (it runs the same installer,
+targeting the directory of the running binary):
+
+```sh
+opp upgrade
+```
 
 ```sh
 # pin a version, choose a directory, or force a reinstall
