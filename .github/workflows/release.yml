@@ -1,7 +1,7 @@
 name: release
 
-# Build `opp` binaries for every supported platform and attach them (plus
-# SHA-256 checksums) to the GitHub Release for the pushed tag.
+# Build `opp` binaries and attach them (plus SHA-256 checksums) to the GitHub
+# Release for the pushed tag.
 on:
   push:
     tags:
@@ -17,7 +17,22 @@ permissions:
   contents: write
 
 jobs:
+  # The upload action below uploads to an existing release, so create it first.
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ensure the release exists
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+        run: |
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --title "$TAG" --generate-notes
+          fi
+
   upload:
+    needs: create-release
     name: ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -25,18 +40,18 @@ jobs:
       matrix:
         include:
           - { os: ubuntu-latest,  target: x86_64-unknown-linux-musl }
-          - { os: ubuntu-latest,  target: aarch64-unknown-linux-musl }
-          - { os: macos-13,       target: x86_64-apple-darwin }
-          - { os: macos-14,       target: aarch64-apple-darwin }
           - { os: windows-latest, target: x86_64-pc-windows-msvc }
+          # Disabled for now (slow); re-enable when needed:
+          # - { os: ubuntu-latest,  target: aarch64-unknown-linux-musl }
+          # - { os: macos-13,       target: x86_64-apple-darwin }
+          # - { os: macos-14,       target: aarch64-apple-darwin }
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
 
-      # Builds the binary (cross-compiling via `cross` when needed), packages it
-      # as opp-<tag>-<target>.tar.gz (.zip on Windows), writes a .sha256, and
-      # uploads everything to the tag's release (creating it if absent).
+      # Builds the binary, packages it as opp-<tag>-<target>.tar.gz (.zip on
+      # Windows), writes a .sha256, and uploads everything to the tag's release.
       - name: Build and upload
         uses: taiki-e/upload-rust-binary-action@v1
         with:
