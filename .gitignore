@@ -2,6 +2,7 @@
 /.botdock
 /.notes
 /.claude
+/.vscode
 
 # example
 /examples/hello/*
