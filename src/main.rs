@@ -14,7 +14,7 @@ mod project;
 mod prompts;
 mod ui;
 
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use std::path::PathBuf;
 
 use context::Ctx;
@@ -64,6 +64,36 @@ enum Commands {
         #[arg(long, short = 'y')]
         yes: bool,
     },
+    /// Read the design and discuss implementation uncertainties before coding.
+    Discuss {
+        /// Lowest severity to include: `blocking`, `major`, or `all`.
+        #[arg(long, value_enum, default_value_t = DiscussLevel::All)]
+        level: DiscussLevel,
+        /// Write the discussion to this file instead of the terminal.
+        #[arg(long, short = 'o', value_name = "FILE")]
+        output: Option<PathBuf>,
+    },
+}
+
+/// Severity threshold for `opp discuss`.
+#[derive(Clone, Copy, Debug, ValueEnum)]
+enum DiscussLevel {
+    /// Only blocking issues: conflicts, must-resolve questions, clear flaws.
+    Blocking,
+    /// Blocking issues plus major, hard-to-change design decisions.
+    Major,
+    /// Everything, down to minor choices worth confirming first.
+    All,
+}
+
+impl DiscussLevel {
+    fn as_str(self) -> &'static str {
+        match self {
+            DiscussLevel::Blocking => "blocking",
+            DiscussLevel::Major => "major",
+            DiscussLevel::All => "all",
+        }
+    }
 }
 
 fn main() {
@@ -96,5 +126,6 @@ fn run(cli: Cli) -> anyhow::Result<i32> {
         Commands::Review => commands::review::run(&ctx),
         Commands::Test => commands::test::run(&ctx),
         Commands::Clear { yes } => commands::clear::run(&ctx, yes),
+        Commands::Discuss { level, output } => commands::discuss::run(&ctx, level.as_str(), output),
     }
 }

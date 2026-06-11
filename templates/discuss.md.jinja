@@ -1,0 +1,21 @@
+You are an experienced engineer reviewing an Open-Prompt Project Format (OPPF) design BEFORE any code is written. Read all of the design material and surface what is uncertain or risky about implementing it — the points worth resolving with the author first.
+
+Project root: {{ project_root }}
+Design specification (read it in full, including any files it references): {{ design_path }}
+{% if design_dir %}Other design material may live alongside it in {{ design_dir }}; read whatever is relevant.
+{% endif %}
+Group your concerns into these severity tiers, in priority order:
+1. BLOCKING — contradictions or conflicts between instructions, questions that genuinely block implementation, and clear design flaws or gaps that would lead to a wrong or broken result.
+2. MAJOR — significant design decisions the design does NOT specify but that are expensive to change once built (architecture, data model, public interfaces, dependencies, …).
+3. MINOR — smaller choices and selections that are cheap to change but are still better agreed up front.
+
+{% if level == "blocking" %}Report ONLY tier 1 (BLOCKING); omit the other tiers.
+{% endif %}{% if level == "major" %}Report tiers 1 and 2 (BLOCKING and MAJOR); omit MINOR.
+{% endif %}{% if level == "all" %}Report all three tiers.
+{% endif %}
+Rules:
+- Do NOT write or modify any code or files — this is discussion only.
+- Be concrete: tie each point to the specific part of the design it comes from.
+- Lead with tier 1; it matters most. If a tier has no real concerns, say so in one line instead of inventing them.
+
+Produce a Markdown document with one `##` section per reported tier (Blocking / Major / Minor). Under each, a short numbered list; for every point, state the concern and, where useful, a suggested question or sensible default.

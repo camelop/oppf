@@ -15,6 +15,7 @@ use crate::project::Project;
 
 const IMPL_TEMPLATE: &str = include_str!("../templates/impl.md.jinja");
 const REVIEW_TEMPLATE: &str = include_str!("../templates/review.md.jinja");
+const DISCUSS_TEMPLATE: &str = include_str!("../templates/discuss.md.jinja");
 
 /// The shared, lazily-built template environment.
 fn environment() -> &'static Environment<'static> {
@@ -25,6 +26,8 @@ fn environment() -> &'static Environment<'static> {
             .expect("templates/impl.md.jinja is a valid template");
         env.add_template("review", REVIEW_TEMPLATE)
             .expect("templates/review.md.jinja is a valid template");
+        env.add_template("discuss", DISCUSS_TEMPLATE)
+            .expect("templates/discuss.md.jinja is a valid template");
         env
     })
 }
@@ -41,6 +44,21 @@ pub fn impl_prompt(project: &Project, design_path: &Path) -> Result<String> {
             exclude => &project.config.exclude,
         })
         .context("rendering the impl prompt")
+}
+
+/// Prompt for `opp discuss`: surface implementation uncertainties at or above
+/// `level` (`"blocking"`, `"major"`, or `"all"`).
+pub fn discuss_prompt(project: &Project, design_path: &Path, level: &str) -> Result<String> {
+    environment()
+        .get_template("discuss")
+        .expect("discuss template is registered")
+        .render(context! {
+            project_root => project.root.display().to_string(),
+            design_path => design_path.display().to_string(),
+            design_dir => project.design_dir().map(|d| d.display().to_string()),
+            level => level,
+        })
+        .context("rendering the discuss prompt")
 }
 
 /// Prompt for `opp review`: check a single acceptance property.

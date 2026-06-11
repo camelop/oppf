@@ -13,6 +13,9 @@ and drives a coding agent through the project lifecycle:
 - **`opp review`** — have the agent check each acceptance property, with a
   pass/fail verdict per property.
 - **`opp test`** — run the project's test suite and report the result.
+- **`opp discuss`** — read the design and raise implementation uncertainties
+  (conflicts, blocking questions, unspecified design decisions) before any code
+  is written.
 - **`opp clear`** — remove all generated files, reverting to the pre-generation
   state (keeps `.opp/`, `.git/`, and excluded paths).
 
@@ -151,7 +154,19 @@ opp test
 # Remove all generated files (keeps .opp/, .git/, excluded paths)
 opp clear        # asks for confirmation
 opp clear --yes  # delete without prompting
+
+# Discuss implementation uncertainties before coding
+opp discuss                    # all tiers, printed to the terminal
+opp discuss --level blocking   # only conflicts / blockers / clear flaws
+opp discuss --level major      # blocking + major design decisions
+opp discuss -o discussion.md   # write the discussion to a file
 ```
+
+`opp discuss` reports concerns in three severity tiers — **blocking**
+(contradictions, must-resolve questions, clear flaws), **major** (unspecified
+but hard-to-change design decisions), and **minor** (small choices worth
+agreeing first). `--level` sets the lowest tier to include; `-o/--output` writes
+the result to a file instead of the terminal.
 
 Global options:
 

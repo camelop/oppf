@@ -32,8 +32,13 @@ pub fn run(ctx: &Ctx) -> Result<i32> {
         ctx.project.root.display(),
         ctx.agent.id()
     ));
-    let run =
-        agent::run_with_progress(ctx.agent.as_ref(), &prompt, &ctx.project.root, ctx.verbose)?;
+    let run = agent::run_with_progress(
+        ctx.agent.as_ref(),
+        &prompt,
+        &ctx.project.root,
+        ctx.verbose,
+        true,
+    )?;
 
     if run.success {
         print_follow_up(ctx, run.session_id.as_deref());

@@ -190,14 +190,18 @@ pub fn run_captured(
 /// session id, and a numbered feed of the agent's actions as they happen.
 /// Otherwise it falls back to inheriting the agent's native output, still
 /// framing the region and reporting the process id.
+/// `show_final` controls whether the agent's final answer is rendered in the
+/// frame; pass `false` when the caller wants to present the captured text itself
+/// (e.g. write it to a file).
 pub fn run_with_progress(
     agent: &dyn Agent,
     prompt: &str,
     cwd: &Path,
     verbose: bool,
+    show_final: bool,
 ) -> Result<AgentRun> {
     match agent.build_streaming_command(prompt) {
-        Some(cmd) => run_json_stream(agent, &cmd, cwd, verbose),
+        Some(cmd) => run_json_stream(agent, &cmd, cwd, verbose, show_final),
         None => run_inherited(agent, &agent.build_command(prompt), cwd),
     }
 }
@@ -207,6 +211,7 @@ fn run_json_stream(
     cmd: &AgentCommand,
     cwd: &Path,
     verbose: bool,
+    show_final: bool,
 ) -> Result<AgentRun> {
     let mut child = Command::new(&cmd.program)
         .args(&cmd.args)
@@ -272,7 +277,13 @@ fn run_json_stream(
     let secs = started.elapsed().as_secs();
 
     match summary.as_deref().map(str::trim) {
-        Some(text) if !text.is_empty() => crate::ui::agent_final(text),
+        Some(text) if !text.is_empty() => {
+            // The final answer supersedes the last held message; render it only
+            // when asked (callers that capture it suppress the frame copy).
+            if show_final {
+                crate::ui::agent_final(text);
+            }
+        }
         // No final summary — surface the last held message instead.
         _ => flush_pending(&mut pending_message),
     }
