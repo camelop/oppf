@@ -1,6 +1,6 @@
 [package]
 name = "oppf"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "Reference CLI for the Open-Prompt Project Format (OPPF)"
 license = "MIT"
