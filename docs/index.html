@@ -223,8 +223,8 @@
     <section id="start" class="band">
       <h2>Quick start</h2>
       <div class="layout-grid">
-        <pre class="terminal-body plain"><code><span class="c-dim"># build the CLI</span>
-<span class="c-cmd">cargo build --release</span>
+        <pre class="terminal-body plain"><code><span class="c-dim"># install (or upgrade) opp — idempotent, one line</span>
+<span class="c-cmd">curl -fsSL https://raw.githubusercontent.com/camelop/oppf/main/install.sh | sh</span>
 
 <span class="c-dim"># inside a project that has an .opp/ folder</span>
 <span class="c-cmd">opp impl</span>     <span class="c-dim"># generate the implementation</span>
@@ -234,13 +234,14 @@
 <span class="c-dim"># preview the agent calls without running them</span>
 <span class="c-cmd">opp --dry-run impl</span></code></pre>
         <div class="layout-notes">
-          <h3>Requirements</h3>
+          <h3>Install &amp; upgrade</h3>
           <ul>
-            <li>A <a href="https://rustup.rs">Rust</a> toolchain to build <code>opp</code>.</li>
-            <li>A coding-agent CLI on your <code>PATH</code> — <code>claude</code> or <code>codex</code>.</li>
-            <li>That's it. Point <code>opp</code> at any <code>.opp/</code> project and go.</li>
+            <li>The <strong>one-liner</strong> downloads a prebuilt binary for your platform into <code>~/.local/bin</code> and verifies its checksum.</li>
+            <li>It is <strong>idempotent</strong> — re-run the exact same command to upgrade, or to no-op when already current.</li>
+            <li>Pin a version with <code>… | sh -s -- --version v0.1.0</code>, or change the dir with <code>OPP_INSTALL_DIR=…</code>.</li>
+            <li>Need a coding-agent CLI on your <code>PATH</code> — <code>claude</code> or <code>codex</code>.</li>
           </ul>
-          <p class="note">The full spec lives in the repo's <code>.notes/guidelines.md</code>; usage details are in the <code>README</code>.</p>
+          <p class="note">Prefer source? <code>cargo build --release</code>. The spec lives in <code>.notes/guidelines.md</code>; details in the <code>README</code>.</p>
         </div>
       </div>
     </section>
