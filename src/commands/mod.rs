@@ -29,7 +29,10 @@ pub fn require_login(ctx: &Ctx) -> Result<Option<i32>> {
         }
         AuthState::Unknown => Ok(None),
         AuthState::LoggedOut => {
-            ui::error(&format!("not logged in to {} — log in first:", ctx.agent.id()));
+            ui::error(&format!(
+                "not logged in to {} — log in first:",
+                ctx.agent.id()
+            ));
             for line in ctx.agent.login_instructions() {
                 ui::detail(&line);
             }

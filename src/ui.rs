@@ -74,7 +74,11 @@ pub fn item_pass(name: &str) {
 
 /// A failing list item with a dim reason.
 pub fn item_fail(name: &str, reason: &str) {
-    eprintln!("  {}  {name} {}", sgr("1;31", "✗"), dim(&format!("— {reason}")));
+    eprintln!(
+        "  {}  {name} {}",
+        sgr("1;31", "✗"),
+        dim(&format!("— {reason}"))
+    );
 }
 
 /// An inconclusive list item with a dim note.
@@ -86,7 +90,12 @@ pub fn item_unknown(name: &str, note: &str) {
 
 /// Open the agent frame with its identity and process id.
 pub fn agent_open(agent_id: &str, pid: u32) {
-    eprintln!("{} {} {}", dim("╭─"), bold(agent_id), dim(&format!("· pid {pid}")));
+    eprintln!(
+        "{} {} {}",
+        dim("╭─"),
+        bold(agent_id),
+        dim(&format!("· pid {pid}"))
+    );
 }
 
 /// The agent's session id, inside the frame.
@@ -124,7 +133,11 @@ pub fn agent_final(text: &str) {
 
 /// Close the agent frame after a successful run.
 pub fn agent_close(secs: u64, steps: u32) {
-    eprintln!("{} {}", dim("╰─"), dim(&format!("done in {secs}s · {steps} steps")));
+    eprintln!(
+        "{} {}",
+        dim("╰─"),
+        dim(&format!("done in {secs}s · {steps} steps"))
+    );
 }
 
 /// Close the agent frame after a failed run.

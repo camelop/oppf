@@ -47,18 +47,11 @@ impl Agent for Codex {
             Some("thread.started") => value
                 .get("thread_id")
                 .and_then(Value::as_str)
-                .map(|id| {
-                    vec![AgentEvent::Session {
-                        id: id.to_string(),
-                    }]
-                })
+                .map(|id| vec![AgentEvent::Session { id: id.to_string() }])
                 .unwrap_or_default(),
             // Items (command runs, file edits, messages) are reported once on
             // completion; ignore the `started`/`updated` phases to avoid noise.
-            Some("item.completed") => value
-                .get("item")
-                .map(item_events)
-                .unwrap_or_default(),
+            Some("item.completed") => value.get("item").map(item_events).unwrap_or_default(),
             Some("error") => value
                 .get("message")
                 .and_then(Value::as_str)

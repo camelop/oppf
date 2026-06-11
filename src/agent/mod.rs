@@ -42,7 +42,10 @@ pub enum AgentEvent {
     /// An assistant text message (a snippet of the agent's reasoning/output).
     Message(String),
     /// The agent invoked a tool (e.g. wrote a file, ran a command).
-    Action { tool: String, detail: Option<String> },
+    Action {
+        tool: String,
+        detail: Option<String>,
+    },
     /// The run finished; carries the agent's final summary text, if any.
     Done { summary: Option<String> },
 }
@@ -152,7 +155,12 @@ pub struct AgentRun {
 /// caller needs to parse the agent's reply rather than show it live. The agent's
 /// own chatter is kept quiet unless the run fails or `verbose` is set, in which
 /// case it is shown framed.
-pub fn run_captured(agent: &dyn Agent, prompt: &str, cwd: &Path, verbose: bool) -> Result<AgentRun> {
+pub fn run_captured(
+    agent: &dyn Agent,
+    prompt: &str,
+    cwd: &Path,
+    verbose: bool,
+) -> Result<AgentRun> {
     let cmd = agent.build_command(prompt);
     let output = Command::new(&cmd.program)
         .args(&cmd.args)
@@ -315,7 +323,9 @@ fn run_inherited(agent: &dyn Agent, cmd: &AgentCommand, cwd: &Path) -> Result<Ag
 
 fn spawn_error(program: &str, err: std::io::Error) -> anyhow::Error {
     if err.kind() == std::io::ErrorKind::NotFound {
-        anyhow!("could not run `{program}`: command not found. Is the agent CLI installed and on PATH?")
+        anyhow!(
+            "could not run `{program}`: command not found. Is the agent CLI installed and on PATH?"
+        )
     } else {
         anyhow!("failed to run `{program}`: {err}")
     }

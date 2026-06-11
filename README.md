@@ -171,7 +171,27 @@ Global options:
 with `OPP_PROJECT_ROOT` set to the project root, so the script can locate the
 implementation regardless of where `opp` was invoked from.
 
-## Building
+## Install
+
+One line installs (or upgrades) `opp` to `~/.local/bin`:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/camelop/oppf/main/install.sh | sh
+```
+
+The installer is idempotent: re-run the same command to upgrade to the latest
+release, or to no-op when you are already up to date. It downloads a prebuilt
+binary for your platform (Linux/macOS, x86_64/arm64) from the
+[GitHub Releases](https://github.com/camelop/oppf/releases) and verifies its
+SHA-256 checksum.
+
+```sh
+# pin a version, choose a directory, or force a reinstall
+curl -fsSL https://raw.githubusercontent.com/camelop/oppf/main/install.sh | sh -s -- --version v0.1.0
+OPP_INSTALL_DIR=/usr/local/bin curl -fsSL .../install.sh | sh
+```
+
+## Building from source
 
 Requires a [Rust](https://rustup.rs) toolchain.
 

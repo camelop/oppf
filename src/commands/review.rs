@@ -39,12 +39,18 @@ pub fn run(ctx: &Ctx) -> Result<i32> {
 
         if ctx.dry_run {
             let cmd = ctx.agent.build_command(&prompt);
-            println!("# review property `{name}` (dry-run) — agent: {}", ctx.agent.id());
+            println!(
+                "# review property `{name}` (dry-run) — agent: {}",
+                ctx.agent.id()
+            );
             println!("$ {}\n", cmd.display());
             continue;
         }
 
-        ui::info(&format!("review: checking `{name}` with {} ...", ctx.agent.id()));
+        ui::info(&format!(
+            "review: checking `{name}` with {} ...",
+            ctx.agent.id()
+        ));
         let run = agent::run_captured(ctx.agent.as_ref(), &prompt, &ctx.project.root, ctx.verbose)?;
         let verdict = parse_verdict(run.stdout.as_deref().unwrap_or_default());
         results.push((name, verdict));
@@ -76,7 +82,10 @@ pub fn run(ctx: &Ctx) -> Result<i32> {
         ui::good(&format!("all {} properties passed", results.len()));
         Ok(0)
     } else {
-        ui::error(&format!("{failed} of {} properties did not pass", results.len()));
+        ui::error(&format!(
+            "{failed} of {} properties did not pass",
+            results.len()
+        ));
         Ok(1)
     }
 }
@@ -116,7 +125,10 @@ mod tests {
 
     #[test]
     fn parses_pass() {
-        assert!(matches!(parse_verdict("blah\nOPP_REVIEW: PASS"), Verdict::Pass));
+        assert!(matches!(
+            parse_verdict("blah\nOPP_REVIEW: PASS"),
+            Verdict::Pass
+        ));
     }
 
     #[test]

@@ -32,7 +32,8 @@ pub fn run(ctx: &Ctx) -> Result<i32> {
         ctx.project.root.display(),
         ctx.agent.id()
     ));
-    let run = agent::run_with_progress(ctx.agent.as_ref(), &prompt, &ctx.project.root, ctx.verbose)?;
+    let run =
+        agent::run_with_progress(ctx.agent.as_ref(), &prompt, &ctx.project.root, ctx.verbose)?;
 
     if run.success {
         print_follow_up(ctx, run.session_id.as_deref());
@@ -51,7 +52,10 @@ fn print_follow_up(ctx: &Ctx, session_id: Option<&str>) {
     };
     ui::blank();
     ui::info(&format!("continue this same {} session:", ctx.agent.id()));
-    ui::command(&follow_up.interactive, "pick up where it left off, interactively");
+    ui::command(
+        &follow_up.interactive,
+        "pick up where it left off, interactively",
+    );
     ui::command(&follow_up.headless, "send one more instruction headlessly");
     ui::info("or re-run `opp review` / `opp test` to check the result.");
 }
