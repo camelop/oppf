@@ -79,9 +79,9 @@ in [`src/agent/`](src/agent/) and registering it in `agent::for_id`.
 
 ### Login preflight
 
-Before driving the agent, `opp impl` and `opp review` check that you are logged
-in to the selected agent. If you are not, the command stops immediately and
-tells you how to sign in, rather than failing deep inside a run:
+Before driving the agent, `opp impl`, `opp review`, and `opp discuss` check that
+you are logged in to the selected agent. If you are not, the command stops
+immediately and tells you how to sign in, rather than failing deep inside a run:
 
 ```
 opp: not logged in to codex — log in first:
@@ -135,9 +135,9 @@ Or re-run `opp review` / `opp test` to check the result.
 
 The prompts `opp` sends to the agent are **not** hardcoded — they live in
 [`templates/`](templates/) as [minijinja](https://docs.rs/minijinja) templates
-(`impl.md.jinja`, `review.md.jinja`) and are embedded into the binary at build
-time. Edit those files to tune the instructions; preview the result with
-`opp --dry-run impl` / `opp --dry-run review`.
+(`impl.md.jinja`, `review.md.jinja`, `discuss.md.jinja`) and are embedded into
+the binary at build time. Edit those files to tune the instructions; preview the
+result with `opp --dry-run impl` / `--dry-run review` / `--dry-run discuss`.
 
 ## Usage
 
@@ -166,7 +166,8 @@ opp discuss -o discussion.md   # write the discussion to a file
 (contradictions, must-resolve questions, clear flaws), **major** (unspecified
 but hard-to-change design decisions), and **minor** (small choices worth
 agreeing first). `--level` sets the lowest tier to include; `-o/--output` writes
-the result to a file instead of the terminal.
+the result to a file instead of the terminal. It reads the design and streams
+its progress but never modifies the project.
 
 Global options:
 
@@ -208,7 +209,7 @@ SHA-256 checksum.
 
 ```sh
 # pin a version, choose a directory, or force a reinstall
-curl -fsSL https://oppf.dirp.dev/install.sh | sh -s -- --version v0.1.1
+curl -fsSL https://oppf.dirp.dev/install.sh | sh -s -- --version v0.1.2
 OPP_INSTALL_DIR=/usr/local/bin curl -fsSL https://oppf.dirp.dev/install.sh | sh
 ```
 
