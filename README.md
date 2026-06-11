@@ -233,14 +233,21 @@ cargo test                 # run the unit tests
 
 ## Example
 
-[`examples/hello`](examples/hello) is a complete, prompt-only OPPF project: it
-contains only an `.opp/` directory (design, a review property, and a test). Run
-`opp impl` inside it to generate the implementation, then `opp review` and
-`opp test` to check it. Use `--dry-run` to preview the agent calls first:
+[`examples/hello`](examples/hello) is a prompt-only OPPF project — it contains
+only an `.opp/` directory (design, a review property, and a test). Walk the full
+lifecycle on it:
 
 ```sh
-opp -p examples/hello --dry-run impl
+git clone https://github.com/camelop/oppf.git
+cd oppf/examples/hello
+
+opp impl       # generate hello.sh from .opp/design.md
+opp review     # check each acceptance property
+opp test       # run the test suite
 ```
+
+Use `opp --dry-run impl` to preview the agent call first, or `opp clear` to
+reset back to just the `.opp/` design.
 
 ## License
 
