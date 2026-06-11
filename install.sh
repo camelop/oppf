@@ -113,7 +113,12 @@ main() {
 	# --- resolve version ----------------------------------------------------
 	if [ -z "$version" ]; then
 		info "resolving latest release ..."
-		version="$(fetch "https://api.github.com/repos/${REPO}/releases/latest" |
+		# Capture the full API response first; piping curl straight into
+		# `grep -m1` makes curl error ("Failed writing body") when grep closes
+		# the pipe after the first match.
+		api="$(fetch "https://api.github.com/repos/${REPO}/releases/latest")" ||
+			err "could not reach the GitHub API"
+		version="$(printf '%s\n' "$api" |
 			grep -m1 '"tag_name"' |
 			sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
 		[ -n "$version" ] || err "could not determine the latest version; pass --version vX.Y.Z"
