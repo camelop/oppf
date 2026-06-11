@@ -58,6 +58,12 @@ enum Commands {
     Review,
     /// Run the test suite and report results.
     Test,
+    /// Remove all generated files, reverting to the pre-generation state.
+    Clear {
+        /// Delete without asking for confirmation.
+        #[arg(long, short = 'y')]
+        yes: bool,
+    },
 }
 
 fn main() {
@@ -89,5 +95,6 @@ fn run(cli: Cli) -> anyhow::Result<i32> {
         Commands::Impl => commands::impl_cmd::run(&ctx),
         Commands::Review => commands::review::run(&ctx),
         Commands::Test => commands::test::run(&ctx),
+        Commands::Clear { yes } => commands::clear::run(&ctx, yes),
     }
 }

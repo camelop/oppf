@@ -13,6 +13,8 @@ and drives a coding agent through the project lifecycle:
 - **`opp review`** — have the agent check each acceptance property, with a
   pass/fail verdict per property.
 - **`opp test`** — run the project's test suite and report the result.
+- **`opp clear`** — remove all generated files, reverting to the pre-generation
+  state (keeps `.opp/`, `.git/`, and excluded paths).
 
 > The format itself is specified in [`.notes/guidelines.md`](.notes/guidelines.md).
 
@@ -145,6 +147,10 @@ opp review
 
 # Run the test suite
 opp test
+
+# Remove all generated files (keeps .opp/, .git/, excluded paths)
+opp clear        # asks for confirmation
+opp clear --yes  # delete without prompting
 ```
 
 Global options:
@@ -176,19 +182,19 @@ implementation regardless of where `opp` was invoked from.
 One line installs (or upgrades) `opp` to `~/.local/bin`:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/camelop/oppf/main/install.sh | sh
+curl -fsSL https://oppf.dirp.dev/install.sh | sh
 ```
 
 The installer is idempotent: re-run the same command to upgrade to the latest
 release, or to no-op when you are already up to date. It downloads a prebuilt
-binary for your platform (Linux/macOS, x86_64/arm64) from the
+binary for your platform (Linux/macOS) from the
 [GitHub Releases](https://github.com/camelop/oppf/releases) and verifies its
 SHA-256 checksum.
 
 ```sh
 # pin a version, choose a directory, or force a reinstall
-curl -fsSL https://raw.githubusercontent.com/camelop/oppf/main/install.sh | sh -s -- --version v0.1.0
-OPP_INSTALL_DIR=/usr/local/bin curl -fsSL .../install.sh | sh
+curl -fsSL https://oppf.dirp.dev/install.sh | sh -s -- --version v0.1.1
+OPP_INSTALL_DIR=/usr/local/bin curl -fsSL https://oppf.dirp.dev/install.sh | sh
 ```
 
 ## Building from source

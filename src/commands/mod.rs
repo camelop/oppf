@@ -1,5 +1,6 @@
 //! The three OPP-CLI commands: `impl`, `review`, `test`.
 
+pub mod clear;
 pub mod impl_cmd;
 pub mod review;
 pub mod test;
