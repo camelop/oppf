@@ -234,6 +234,10 @@ code { font-family: var(--mono); font-size: 0.875em; }
 .cards { display: grid; gap: 1.1rem; }
 .cards.three { grid-template-columns: repeat(3, 1fr); }
 @media (max-width: 720px) { .cards.three { grid-template-columns: 1fr; } }
+/* command cards: wrap and centre so an odd count (5) stays balanced */
+.cards.cmds { display: flex; flex-wrap: wrap; justify-content: center; }
+.cards.cmds .card { flex: 1 1 260px; max-width: 300px; }
+@media (max-width: 720px) { .cards.cmds .card { flex-basis: 100%; max-width: none; } }
 .card {
   background: var(--card);
   border: 1px solid var(--line);

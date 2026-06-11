@@ -208,7 +208,11 @@
     <section id="cli" class="band alt">
       <h2>The <code>opp</code> CLI</h2>
       <p class="section-lede">A small Rust binary. It checks you're logged in, drives the agent with live progress, and reports results.</p>
-      <div class="cards three">
+      <div class="cards cmds">
+        <article class="card cmd">
+          <code class="cmd-name">opp discuss</code>
+          <p>Surface implementation uncertainties — conflicts, blocking questions, unspecified decisions — <strong>before</strong> any code is written.</p>
+        </article>
         <article class="card cmd">
           <code class="cmd-name">opp impl</code>
           <p>Read the design and implement what it requires, streaming the agent's actions as it works.</p>
@@ -220,6 +224,10 @@
         <article class="card cmd">
           <code class="cmd-name">opp test</code>
           <p>Run the bundled <code>test.sh</code> suite and report whether it passed.</p>
+        </article>
+        <article class="card cmd">
+          <code class="cmd-name">opp clear</code>
+          <p>Remove all generated files to revert to the pre-generation state. Keeps <code>.opp/</code>, <code>.git/</code>, and excludes.</p>
         </article>
       </div>
       <div class="agent-pills">
