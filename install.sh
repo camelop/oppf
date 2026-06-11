@@ -8,16 +8,13 @@
 # (use --force to reinstall). This same command is how you upgrade.
 #
 # Options / environment:
-#   --version <vX.Y.Z> | OPP_VERSION   pin a specific release (default: latest)
-#   --dir <path>       | OPP_INSTALL_DIR  install location (default: ~/.local/bin)
-#   --force | -f                        reinstall even if up to date
+#   --version <vX.Y.Z> | OPP_VERSION      pin a specific release (default: latest)
+#   --dir <path>       | OPP_INSTALL_DIR   install location (default: ~/.local/bin)
+#   --force | -f                          reinstall even if up to date
 set -eu
 
 REPO="camelop/oppf"
 BIN="opp"
-: "${OPP_INSTALL_DIR:=${HOME}/.local/bin}"
-VERSION="${OPP_VERSION:-}"
-FORCE=0
 
 info() { printf 'opp-install: %s\n' "$1" >&2; }
 err() {
@@ -38,37 +35,6 @@ Usage: install.sh [--version vX.Y.Z] [--dir PATH] [--force]
 EOF
 }
 
-while [ $# -gt 0 ]; do
-	case "$1" in
-	--version)
-		VERSION="${2:-}"
-		shift 2
-		;;
-	--version=*)
-		VERSION="${1#*=}"
-		shift
-		;;
-	--dir)
-		OPP_INSTALL_DIR="${2:-}"
-		shift 2
-		;;
-	--dir=*)
-		OPP_INSTALL_DIR="${1#*=}"
-		shift
-		;;
-	--force | -f)
-		FORCE=1
-		shift
-		;;
-	-h | --help)
-		usage
-		exit 0
-		;;
-	*) err "unknown option: $1 (try --help)" ;;
-	esac
-done
-
-# --- download helpers -------------------------------------------------------
 download() { # <url> <out-file>
 	if have curl; then
 		curl -fsSL "$1" -o "$2"
@@ -88,90 +54,133 @@ fetch() { # <url>  -> stdout
 	fi
 }
 
-# --- detect platform --------------------------------------------------------
-os="$(uname -s)"
-arch="$(uname -m)"
-case "$os" in
-Linux) os="linux" ;;
-Darwin) os="darwin" ;;
-*) err "unsupported OS: $os (the installer supports Linux and macOS)" ;;
-esac
-case "$arch" in
-x86_64 | amd64) arch="x86_64" ;;
-aarch64 | arm64) arch="aarch64" ;;
-*) err "unsupported architecture: $arch" ;;
-esac
-case "$os" in
-linux) target="${arch}-unknown-linux-musl" ;;
-darwin) target="${arch}-apple-darwin" ;;
-esac
+# Everything runs inside main() so that `curl | sh` reads the whole script
+# before executing it — an early exit (e.g. "already up to date") then can't
+# leave curl writing into a closed pipe.
+main() {
+	install_dir="${OPP_INSTALL_DIR:-${HOME}/.local/bin}"
+	version="${OPP_VERSION:-}"
+	force=0
 
-# --- resolve version --------------------------------------------------------
-if [ -z "$VERSION" ]; then
-	info "resolving latest release ..."
-	VERSION="$(fetch "https://api.github.com/repos/${REPO}/releases/latest" |
-		grep -m1 '"tag_name"' |
-		sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
-	[ -n "$VERSION" ] || err "could not determine the latest version; pass --version vX.Y.Z"
-fi
-case "$VERSION" in v*) ;; *) VERSION="v${VERSION}" ;; esac
-want="${VERSION#v}"
+	while [ $# -gt 0 ]; do
+		case "$1" in
+		--version)
+			version="${2:-}"
+			shift 2
+			;;
+		--version=*)
+			version="${1#*=}"
+			shift
+			;;
+		--dir)
+			install_dir="${2:-}"
+			shift 2
+			;;
+		--dir=*)
+			install_dir="${1#*=}"
+			shift
+			;;
+		--force | -f)
+			force=1
+			shift
+			;;
+		-h | --help)
+			usage
+			exit 0
+			;;
+		*) err "unknown option: $1 (try --help)" ;;
+		esac
+	done
 
-# --- idempotency / up-to-date check ----------------------------------------
-dest="${OPP_INSTALL_DIR}/${BIN}"
-if [ "$FORCE" -ne 1 ] && [ -x "$dest" ]; then
-	current="$("$dest" --version 2>/dev/null | awk '{print $2}' || true)"
-	if [ "$current" = "$want" ]; then
-		info "opp ${want} is already installed at ${dest} — up to date."
-		exit 0
+	# --- detect platform ----------------------------------------------------
+	os="$(uname -s)"
+	arch="$(uname -m)"
+	case "$os" in
+	Linux) os="linux" ;;
+	Darwin) os="darwin" ;;
+	*) err "unsupported OS: $os (the installer supports Linux and macOS)" ;;
+	esac
+	case "$arch" in
+	x86_64 | amd64) arch="x86_64" ;;
+	aarch64 | arm64) arch="aarch64" ;;
+	*) err "unsupported architecture: $arch" ;;
+	esac
+	case "$os" in
+	linux) target="${arch}-unknown-linux-musl" ;;
+	darwin) target="${arch}-apple-darwin" ;;
+	esac
+
+	# --- resolve version ----------------------------------------------------
+	if [ -z "$version" ]; then
+		info "resolving latest release ..."
+		version="$(fetch "https://api.github.com/repos/${REPO}/releases/latest" |
+			grep -m1 '"tag_name"' |
+			sed -E 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/')"
+		[ -n "$version" ] || err "could not determine the latest version; pass --version vX.Y.Z"
 	fi
-	[ -n "$current" ] && info "upgrading opp ${current} -> ${want}"
-fi
+	case "$version" in v*) ;; *) version="v${version}" ;; esac
+	want="${version#v}"
 
-# --- download + verify + extract -------------------------------------------
-asset="${BIN}-${VERSION}-${target}.tar.gz"
-base="https://github.com/${REPO}/releases/download/${VERSION}"
-tmp="$(mktemp -d)"
-trap 'rm -rf "$tmp"' EXIT
+	# --- idempotency / up-to-date check ------------------------------------
+	dest="${install_dir}/${BIN}"
+	if [ "$force" -ne 1 ] && [ -x "$dest" ]; then
+		current="$("$dest" --version 2>/dev/null | awk '{print $2}' || true)"
+		if [ "$current" = "$want" ]; then
+			info "opp ${want} is already installed at ${dest} — up to date."
+			exit 0
+		fi
+		[ -n "$current" ] && info "upgrading opp ${current} -> ${want}"
+	fi
 
-info "downloading ${asset} ..."
-download "${base}/${asset}" "${tmp}/${asset}" ||
-	err "download failed — is ${VERSION} released for ${target}?"
+	# --- download + verify + extract ---------------------------------------
+	asset="${BIN}-${version}-${target}.tar.gz"
+	checksum="${asset%.tar.gz}.sha256" # action names it opp-<ver>-<target>.sha256
+	base="https://github.com/${REPO}/releases/download/${version}"
+	tmp="$(mktemp -d)"
+	trap 'rm -rf "$tmp"' EXIT
 
-if download "${base}/${asset}.sha256" "${tmp}/${asset}.sha256" 2>/dev/null; then
-	if have sha256sum; then
-		(cd "$tmp" && sha256sum -c "${asset}.sha256" >/dev/null 2>&1) || err "checksum verification failed"
-		info "checksum ok"
-	elif have shasum; then
-		(cd "$tmp" && shasum -a 256 -c "${asset}.sha256" >/dev/null 2>&1) || err "checksum verification failed"
-		info "checksum ok"
+	info "downloading ${asset} ..."
+	download "${base}/${asset}" "${tmp}/${asset}" ||
+		err "download failed — is ${version} released for ${target}?"
+
+	if download "${base}/${checksum}" "${tmp}/${checksum}" 2>/dev/null; then
+		# The checksum file lists the tarball name, which sits in the same dir.
+		if have sha256sum; then
+			(cd "$tmp" && sha256sum -c "${checksum}" >/dev/null 2>&1) || err "checksum verification failed"
+			info "checksum ok"
+		elif have shasum; then
+			(cd "$tmp" && shasum -a 256 -c "${checksum}" >/dev/null 2>&1) || err "checksum verification failed"
+			info "checksum ok"
+		else
+			info "no sha256 tool found; skipping checksum verification"
+		fi
 	else
-		info "no sha256 tool found; skipping checksum verification"
+		info "checksum file unavailable; skipping verification"
 	fi
-else
-	info "checksum file unavailable; skipping verification"
-fi
 
-tar -xzf "${tmp}/${asset}" -C "$tmp" || err "failed to extract ${asset}"
-binpath="$(find "$tmp" -type f -name "$BIN" | head -n1)"
-[ -n "$binpath" ] || err "binary '${BIN}' not found inside the archive"
+	tar -xzf "${tmp}/${asset}" -C "$tmp" || err "failed to extract ${asset}"
+	binpath="$(find "$tmp" -type f -name "$BIN" | head -n1)"
+	[ -n "$binpath" ] || err "binary '${BIN}' not found inside the archive"
 
-# --- install atomically -----------------------------------------------------
-mkdir -p "$OPP_INSTALL_DIR" || err "cannot create ${OPP_INSTALL_DIR}"
-chmod +x "$binpath"
-staged="${dest}.tmp.$$"
-cp "$binpath" "$staged" || err "cannot write to ${OPP_INSTALL_DIR} (try --dir)"
-mv -f "$staged" "$dest"
-info "installed opp ${want} -> ${dest}"
+	# --- install atomically -------------------------------------------------
+	mkdir -p "$install_dir" || err "cannot create ${install_dir}"
+	chmod +x "$binpath"
+	staged="${dest}.tmp.$$"
+	cp "$binpath" "$staged" || err "cannot write to ${install_dir} (try --dir)"
+	mv -f "$staged" "$dest"
+	info "installed opp ${want} -> ${dest}"
 
-# --- PATH hint + smoke check -----------------------------------------------
-case ":${PATH}:" in
-*":${OPP_INSTALL_DIR}:"*) ;;
-*)
-	info "note: ${OPP_INSTALL_DIR} is not on your PATH. Add it with:"
-	info "  export PATH=\"${OPP_INSTALL_DIR}:\$PATH\""
-	;;
-esac
-if "$dest" --version >/dev/null 2>&1; then
-	info "done. Run 'opp --help' to get started."
-fi
+	# --- PATH hint + smoke check -------------------------------------------
+	case ":${PATH}:" in
+	*":${install_dir}:"*) ;;
+	*)
+		info "note: ${install_dir} is not on your PATH. Add it with:"
+		info "  export PATH=\"${install_dir}:\$PATH\""
+		;;
+	esac
+	if "$dest" --version >/dev/null 2>&1; then
+		info "done. Run 'opp --help' to get started."
+	fi
+}
+
+main "$@"
