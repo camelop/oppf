@@ -119,8 +119,9 @@ Colors auto-disable when output is not a terminal or `NO_COLOR` is set. Pass
 `-v, --verbose` to also echo the agent's raw streaming output. Agents without
 structured streaming fall back to their native output (still framed).
 
-When the run finishes, `opp impl` prints how to continue the **same** agent
-session, so you can iterate without losing context:
+When the run finishes, `opp impl` and `opp discuss` print how to continue the
+**same** agent session, so you can iterate (or dig into the raised points)
+without losing context:
 
 ```
 Want changes? Continue this same claude-code session:

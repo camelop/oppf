@@ -165,6 +165,7 @@ pub fn run_captured(
     let output = Command::new(&cmd.program)
         .args(&cmd.args)
         .current_dir(cwd)
+        .stdin(Stdio::null())
         .output()
         .map_err(|e| spawn_error(&cmd.program, e))?;
 
@@ -216,6 +217,7 @@ fn run_json_stream(
     let mut child = Command::new(&cmd.program)
         .args(&cmd.args)
         .current_dir(cwd)
+        .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::inherit())
         .spawn()
@@ -311,6 +313,7 @@ fn run_inherited(agent: &dyn Agent, cmd: &AgentCommand, cwd: &Path) -> Result<Ag
     let mut child = Command::new(&cmd.program)
         .args(&cmd.args)
         .current_dir(cwd)
+        .stdin(Stdio::null())
         .spawn()
         .map_err(|e| spawn_error(&cmd.program, e))?;
 

@@ -72,6 +72,11 @@ pub fn run(ctx: &Ctx, level: &str, output: Option<PathBuf>) -> Result<i32> {
     }
 
     if run.success {
+        crate::commands::print_session_follow_up(
+            ctx,
+            run.session_id.as_deref(),
+            "or run `opp impl` once the open questions are settled.",
+        );
         Ok(0)
     } else {
         Ok(1)

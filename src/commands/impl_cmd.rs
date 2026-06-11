@@ -41,26 +41,14 @@ pub fn run(ctx: &Ctx) -> Result<i32> {
     )?;
 
     if run.success {
-        print_follow_up(ctx, run.session_id.as_deref());
+        crate::commands::print_session_follow_up(
+            ctx,
+            run.session_id.as_deref(),
+            "or re-run `opp review` / `opp test` to check the result.",
+        );
         Ok(0)
     } else {
         ui::error("the agent exited with a failure status");
         Ok(1)
     }
-}
-
-/// Tell the user how to keep iterating in the same agent session.
-fn print_follow_up(ctx: &Ctx, session_id: Option<&str>) {
-    let Some(id) = session_id else { return };
-    let Some(follow_up) = ctx.agent.follow_up(id) else {
-        return;
-    };
-    ui::blank();
-    ui::info(&format!("continue this same {} session:", ctx.agent.id()));
-    ui::command(
-        &follow_up.interactive,
-        "pick up where it left off, interactively",
-    );
-    ui::command(&follow_up.headless, "send one more instruction headlessly");
-    ui::info("or re-run `opp review` / `opp test` to check the result.");
 }

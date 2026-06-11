@@ -1,4 +1,4 @@
-//! The three OPP-CLI commands: `impl`, `review`, `test`.
+//! The OPP-CLI commands and small helpers shared between them.
 
 pub mod clear;
 pub mod discuss;
@@ -41,5 +41,25 @@ pub fn require_login(ctx: &Ctx) -> Result<Option<i32>> {
             }
             Ok(Some(EXIT_NOT_LOGGED_IN))
         }
+    }
+}
+
+/// Tell the user how to keep iterating in the same agent session, followed by a
+/// command-specific `closing` suggestion. No-op when there is no session id or
+/// the agent does not support resuming.
+pub fn print_session_follow_up(ctx: &Ctx, session_id: Option<&str>, closing: &str) {
+    let Some(id) = session_id else { return };
+    let Some(follow_up) = ctx.agent.follow_up(id) else {
+        return;
+    };
+    ui::blank();
+    ui::info(&format!("continue this same {} session:", ctx.agent.id()));
+    ui::command(
+        &follow_up.interactive,
+        "pick up where it left off, interactively",
+    );
+    ui::command(&follow_up.headless, "send one more instruction headlessly");
+    if !closing.is_empty() {
+        ui::info(closing);
     }
 }
