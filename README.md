@@ -162,14 +162,17 @@ opp discuss                    # all tiers, printed to the terminal
 opp discuss --level blocking   # only conflicts / blockers / clear flaws
 opp discuss --level major      # blocking + major design decisions
 opp discuss -o discussion.md   # write the discussion to a file
+opp discuss -f "focus on error handling and the public API"   # add your own guidance
 ```
 
 `opp discuss` reports concerns in three severity tiers — **blocking**
 (contradictions, must-resolve questions, clear flaws), **major** (unspecified
 but hard-to-change design decisions), and **minor** (small choices worth
 agreeing first). `--level` sets the lowest tier to include; `-o/--output` writes
-the result to a file instead of the terminal. It reads the design and streams
-its progress but never modifies the project.
+the result to a file instead of the terminal; `-f/--focus <TEXT>` adds your own
+guidance to the prompt (what to pay attention to, or any requirements for the
+review). It reads the design and streams its progress but never modifies the
+project.
 
 Global options:
 

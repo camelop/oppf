@@ -4,7 +4,10 @@ Project root: {{ project_root }}
 Design specification (read it in full, including any files it references): {{ design_path }}
 {% if design_dir %}Other design material may live alongside it in {{ design_dir }}; read whatever is relevant.
 {% endif %}
-Group your concerns into these severity tiers, in priority order:
+{% if focus %}Focus / requirements from the author — treat this as a priority and fold it into the relevant tiers:
+{{ focus }}
+
+{% endif %}Group your concerns into these severity tiers, in priority order:
 1. BLOCKING — contradictions or conflicts between instructions, questions that genuinely block implementation, and clear design flaws or gaps that would lead to a wrong or broken result.
 2. MAJOR — significant design decisions the design does NOT specify but that are expensive to change once built (architecture, data model, public interfaces, dependencies, …).
 3. MINOR — smaller choices and selections that are cheap to change but are still better agreed up front.

@@ -74,6 +74,9 @@ enum Commands {
         /// Write the discussion to this file instead of the terminal.
         #[arg(long, short = 'o', value_name = "FILE")]
         output: Option<PathBuf>,
+        /// Extra guidance added to the prompt: what to focus on or require.
+        #[arg(long, short = 'f', value_name = "TEXT")]
+        focus: Option<String>,
     },
 }
 
@@ -133,7 +136,11 @@ fn run(cli: Cli) -> anyhow::Result<i32> {
         Commands::Review => commands::review::run(&ctx),
         Commands::Test => commands::test::run(&ctx),
         Commands::Clear { yes } => commands::clear::run(&ctx, yes),
-        Commands::Discuss { level, output } => commands::discuss::run(&ctx, level.as_str(), output),
+        Commands::Discuss {
+            level,
+            output,
+            focus,
+        } => commands::discuss::run(&ctx, level.as_str(), output, focus.as_deref()),
         Commands::Upgrade => unreachable!("handled before project discovery"),
     }
 }

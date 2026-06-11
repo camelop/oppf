@@ -11,10 +11,11 @@ use crate::prompts;
 use crate::ui;
 
 /// `level` is `"blocking"`, `"major"`, or `"all"`. `output`, when set, writes the
-/// discussion to that file instead of the terminal.
-pub fn run(ctx: &Ctx, level: &str, output: Option<PathBuf>) -> Result<i32> {
+/// discussion to that file instead of the terminal. `focus`, when set, is extra
+/// guidance from the user that is added to the prompt.
+pub fn run(ctx: &Ctx, level: &str, output: Option<PathBuf>, focus: Option<&str>) -> Result<i32> {
     let design = ctx.project.design_path()?;
-    let prompt = prompts::discuss_prompt(&ctx.project, &design, level)?;
+    let prompt = prompts::discuss_prompt(&ctx.project, &design, level, focus)?;
 
     if ctx.dry_run {
         let cmd = ctx

@@ -47,8 +47,14 @@ pub fn impl_prompt(project: &Project, design_path: &Path) -> Result<String> {
 }
 
 /// Prompt for `opp discuss`: surface implementation uncertainties at or above
-/// `level` (`"blocking"`, `"major"`, or `"all"`).
-pub fn discuss_prompt(project: &Project, design_path: &Path, level: &str) -> Result<String> {
+/// `level` (`"blocking"`, `"major"`, or `"all"`). `focus`, when set, is extra
+/// guidance from the user that is woven into the prompt.
+pub fn discuss_prompt(
+    project: &Project,
+    design_path: &Path,
+    level: &str,
+    focus: Option<&str>,
+) -> Result<String> {
     environment()
         .get_template("discuss")
         .expect("discuss template is registered")
@@ -57,6 +63,7 @@ pub fn discuss_prompt(project: &Project, design_path: &Path, level: &str) -> Res
             design_path => design_path.display().to_string(),
             design_dir => project.design_dir().map(|d| d.display().to_string()),
             level => level,
+            focus => focus,
         })
         .context("rendering the discuss prompt")
 }
