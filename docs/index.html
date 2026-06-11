@@ -51,8 +51,9 @@
       <p class="install-note">Linux &amp; macOS · re-run the same line to upgrade · or <a href="#start">build from source</a>.</p>
 
       <div class="hero-actions">
-        <a class="btn primary" href="#lifecycle">See how it works</a>
-        <a class="btn ghost" href="https://github.com/camelop/oppf" target="_blank" rel="noopener">View on GitHub</a>
+        <a class="btn primary" href="#start">Quick start</a>
+        <a class="btn ghost" href="#lifecycle">How it works</a>
+        <a class="btn ghost" href="https://github.com/camelop/oppf" target="_blank" rel="noopener">GitHub</a>
       </div>
 
       <div class="terminal" aria-hidden="true">
@@ -243,8 +244,8 @@
     <!-- QUICK START -->
     <section id="start" class="band">
       <h2>Quick start</h2>
-      <div class="layout-grid">
-        <pre class="terminal-body plain"><code><span class="c-dim"># 1. install (or upgrade) opp — idempotent, one line</span>
+      <p class="section-lede">From an empty shell to a generated, checked project — three steps.</p>
+      <pre class="terminal-body plain qs-code"><code><span class="c-dim"># 1. install (or upgrade) opp — idempotent, one line</span>
 <span class="c-cmd">curl -fsSL https://oppf.dirp.dev/install.sh | sh</span>
 
 <span class="c-dim"># 2. grab the prompt-only example project and enter it</span>
@@ -256,19 +257,14 @@
 <span class="c-cmd">opp review</span>   <span class="c-dim"># check each acceptance property</span>
 <span class="c-cmd">opp test</span>     <span class="c-dim"># run the test suite</span>
 
-<span class="c-dim"># tip: preview the agent call first, or reset with opp clear</span>
+<span class="c-dim"># tip: preview the agent call first, or reset with `opp clear`</span>
 <span class="c-cmd">opp --dry-run impl</span></code></pre>
-        <div class="layout-notes">
-          <h3>Install &amp; upgrade</h3>
-          <ul>
-            <li>The <strong>one-liner</strong> downloads a prebuilt binary for your platform into <code>~/.local/bin</code> and verifies its checksum.</li>
-            <li>It is <strong>idempotent</strong> — re-run the exact same command to upgrade, or to no-op when already current.</li>
-            <li>Pin a version with <code>… | sh -s -- --version v0.1.4</code>, or change the dir with <code>OPP_INSTALL_DIR=…</code>. Already installed? <code>opp upgrade</code>.</li>
-            <li>Need a coding-agent CLI on your <code>PATH</code> — <code>claude</code> or <code>codex</code>.</li>
-          </ul>
-          <p class="note">Prefer source? <code>cargo build --release</code>. The spec lives in <code>.notes/guidelines.md</code>; details in the <code>README</code>.</p>
-        </div>
-      </div>
+      <ul class="qs-notes">
+        <li><strong>Prebuilt &amp; verified</strong> — the installer drops a binary into <code>~/.local/bin</code> and checks its SHA-256.</li>
+        <li><strong>Idempotent</strong> — re-run the one-liner to upgrade, or just <code>opp upgrade</code>.</li>
+        <li><strong>Needs an agent</strong> — <code>claude</code> or <code>codex</code> on your <code>PATH</code>.</li>
+        <li><strong>From source?</strong> — <code>cargo build --release</code>; spec in <code>.notes/guidelines.md</code>.</li>
+      </ul>
     </section>
 
   </main>
