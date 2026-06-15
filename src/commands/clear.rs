@@ -5,8 +5,11 @@
 //! define the project rather than result from it: the `.opp/` directory, any
 //! `exclude` paths from the config, and `.git/` (a hard safety guard so version
 //! control is never destroyed). Asks for confirmation unless `--yes` is given.
+//!
+//! With `--move <DIR>`, the would-be-deleted entries are moved into `<DIR>`
+//! instead of being deleted.
 
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use std::collections::BTreeSet;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -15,50 +18,104 @@ use crate::context::Ctx;
 use crate::project::Project;
 use crate::ui;
 
-pub fn run(ctx: &Ctx, yes: bool) -> Result<i32> {
-    let targets = removable_entries(&ctx.project)?;
+pub fn run(ctx: &Ctx, yes: bool, move_to: Option<PathBuf>) -> Result<i32> {
+    let mut targets = removable_entries(&ctx.project)?;
+
+    // In move mode, resolve the destination and drop any target that is the
+    // destination itself or sits on its path (so we never move a dir into
+    // itself).
+    let dest = match &move_to {
+        Some(dir) => {
+            std::fs::create_dir_all(dir).with_context(|| format!("creating {}", dir.display()))?;
+            let dest_abs = dir
+                .canonicalize()
+                .with_context(|| format!("resolving {}", dir.display()))?;
+            targets.retain(|t| match t.canonicalize() {
+                Ok(t_abs) => !(dest_abs.starts_with(&t_abs) || t_abs.starts_with(&dest_abs)),
+                Err(_) => true,
+            });
+            Some(dest_abs)
+        }
+        None => None,
+    };
 
     if targets.is_empty() {
-        ui::info("clear: nothing to remove — only .opp/ and protected paths are present.");
+        ui::info("clear: nothing to clear — only .opp/ and protected paths are present.");
         return Ok(0);
     }
 
+    let root = &ctx.project.root;
+
     if ctx.dry_run {
-        ui::info(&format!(
-            "clear (dry-run): would remove {} item(s) from {}:",
-            targets.len(),
-            ctx.project.root.display()
-        ));
+        match &move_to {
+            Some(dir) => ui::info(&format!(
+                "clear (dry-run): would move {} item(s) to {}:",
+                targets.len(),
+                dir.display()
+            )),
+            None => ui::info(&format!(
+                "clear (dry-run): would remove {} item(s) from {}:",
+                targets.len(),
+                root.display()
+            )),
+        }
         for p in &targets {
-            ui::detail(&rel(&ctx.project.root, p));
+            ui::detail(&rel(root, p));
         }
         return Ok(0);
     }
 
     if !yes {
-        ui::info(&format!(
-            "clear: about to delete {} item(s) from {}:",
-            targets.len(),
-            ctx.project.root.display()
-        ));
+        match &move_to {
+            Some(dir) => ui::info(&format!(
+                "clear: about to move {} item(s) from {} to {}:",
+                targets.len(),
+                root.display(),
+                dir.display()
+            )),
+            None => ui::info(&format!(
+                "clear: about to delete {} item(s) from {}:",
+                targets.len(),
+                root.display()
+            )),
+        }
         for p in &targets {
-            ui::detail(&rel(&ctx.project.root, p));
+            ui::detail(&rel(root, p));
         }
         ui::info("preserved: .opp/, .git/, and excluded paths.");
-        if !confirm("delete these and revert to the pre-generation state? [y/N] ")? {
-            ui::info("clear: aborted; nothing was deleted.");
+        let prompt = if move_to.is_some() {
+            "move these out of the project? [y/N] "
+        } else {
+            "delete these and revert to the pre-generation state? [y/N] "
+        };
+        if !confirm(prompt)? {
+            ui::info("clear: aborted; nothing was changed.");
             return Ok(0);
         }
     }
 
-    let mut removed = 0;
+    let mut count = 0;
     for p in &targets {
-        remove_path(p).with_context(|| format!("removing {}", p.display()))?;
-        removed += 1;
+        match &dest {
+            Some(dest_dir) => {
+                move_into(p, dest_dir).with_context(|| format!("moving {}", p.display()))?;
+            }
+            None => {
+                remove_path(p).with_context(|| format!("removing {}", p.display()))?;
+            }
+        }
+        count += 1;
     }
-    ui::good(&format!(
-        "clear: removed {removed} item(s); the project is back to its .opp/ design."
-    ));
+
+    match &move_to {
+        Some(dir) => ui::good(&format!(
+            "clear: moved {count} item(s) to {}",
+            dir.display()
+        )),
+        None => ui::good(&format!(
+            "clear: removed {count} item(s); the project is back to its .opp/ design."
+        )),
+    }
     Ok(0)
 }
 
@@ -114,6 +171,45 @@ fn remove_path(p: &Path) -> std::io::Result<()> {
     } else {
         std::fs::remove_file(p)
     }
+}
+
+/// Move `src` into the directory `dest_dir` (keeping its name). Falls back to a
+/// recursive copy + remove when a plain rename can't cross filesystems.
+fn move_into(src: &Path, dest_dir: &Path) -> Result<()> {
+    let name = src
+        .file_name()
+        .ok_or_else(|| anyhow!("cannot move {}", src.display()))?;
+    let dest = dest_dir.join(name);
+    if dest.exists() {
+        return Err(anyhow!(
+            "{} already exists; refusing to overwrite",
+            dest.display()
+        ));
+    }
+    if std::fs::rename(src, &dest).is_ok() {
+        return Ok(());
+    }
+    copy_recursive(src, &dest)?;
+    remove_path(src)?;
+    Ok(())
+}
+
+/// Copy a file, directory tree, or symlink target from `src` to `dest`.
+fn copy_recursive(src: &Path, dest: &Path) -> Result<()> {
+    let meta = std::fs::symlink_metadata(src)?;
+    if meta.is_dir() {
+        std::fs::create_dir_all(dest)?;
+        for entry in std::fs::read_dir(src)? {
+            let entry = entry?;
+            copy_recursive(&entry.path(), &dest.join(entry.file_name()))?;
+        }
+    } else {
+        if let Some(parent) = dest.parent() {
+            std::fs::create_dir_all(parent)?;
+        }
+        std::fs::copy(src, dest)?;
+    }
+    Ok(())
 }
 
 /// Ask the user to confirm on the terminal. A non-`y` answer (including a closed
@@ -172,5 +268,23 @@ mod tests {
 
         std::fs::remove_dir_all(&root).ok();
         assert_eq!(names, vec!["main.rs".to_string(), "src".to_string()]);
+    }
+
+    #[test]
+    fn move_into_relocates_file() {
+        let base = std::env::temp_dir().join(format!("opp-move-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&base);
+        let src_dir = base.join("proj");
+        let dest_dir = base.join("backup");
+        std::fs::create_dir_all(&src_dir).unwrap();
+        std::fs::create_dir_all(&dest_dir).unwrap();
+        let src = src_dir.join("gen.txt");
+        std::fs::write(&src, "x").unwrap();
+
+        move_into(&src, &dest_dir).unwrap();
+
+        assert!(!src.exists());
+        assert!(dest_dir.join("gen.txt").exists());
+        std::fs::remove_dir_all(&base).ok();
     }
 }

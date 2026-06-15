@@ -17,7 +17,8 @@ and drives a coding agent through the project lifecycle:
   (conflicts, blocking questions, unspecified design decisions) before any code
   is written.
 - **`opp clear`** — remove all generated files, reverting to the pre-generation
-  state (keeps `.opp/`, `.git/`, and excluded paths).
+  state (keeps `.opp/`, `.git/`, and excluded paths); `--move <dir>` relocates
+  them instead of deleting.
 - **`opp upgrade`** — update `opp` itself to the latest release.
 
 > The format itself is specified in [`.notes/guidelines.md`](.notes/guidelines.md).
@@ -154,8 +155,9 @@ opp review
 opp test
 
 # Remove all generated files (keeps .opp/, .git/, excluded paths)
-opp clear        # asks for confirmation
-opp clear --yes  # delete without prompting
+opp clear                    # asks for confirmation
+opp clear --yes              # delete without prompting
+opp clear --move ../backup   # move them out instead of deleting
 
 # Discuss implementation uncertainties before coding
 opp discuss                    # all tiers, printed to the terminal

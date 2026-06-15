@@ -63,6 +63,9 @@ enum Commands {
         /// Delete without asking for confirmation.
         #[arg(long, short = 'y')]
         yes: bool,
+        /// Move the would-be-deleted files into this directory instead of deleting.
+        #[arg(long = "move", value_name = "DIR")]
+        move_to: Option<PathBuf>,
     },
     /// Update `opp` itself to the latest release (runs the install script).
     Upgrade,
@@ -135,7 +138,7 @@ fn run(cli: Cli) -> anyhow::Result<i32> {
         Commands::Impl => commands::impl_cmd::run(&ctx),
         Commands::Review => commands::review::run(&ctx),
         Commands::Test => commands::test::run(&ctx),
-        Commands::Clear { yes } => commands::clear::run(&ctx, yes),
+        Commands::Clear { yes, move_to } => commands::clear::run(&ctx, yes, move_to),
         Commands::Discuss {
             level,
             output,
