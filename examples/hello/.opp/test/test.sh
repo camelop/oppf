@@ -1,10 +1,8 @@
 #!/usr/bin/env bash
-# Verify the implementation at $OPP_PROJECT_ROOT satisfies the design.
+# `opp test` runs this from the project root, so the implementation is right here.
 set -euo pipefail
 
-root="${OPP_PROJECT_ROOT:?OPP_PROJECT_ROOT must be set by 'opp test'}"
-
-actual="$(bash "$root/hello.sh")"
+actual="$(bash hello.sh)"
 expected="Hello, OPPF!"
 
 if [[ "$actual" == "$expected" ]]; then

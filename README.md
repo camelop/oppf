@@ -194,9 +194,10 @@ Global options:
 
 ### How `opp test` runs the suite
 
-`.opp/test/test.sh` runs with its own directory as the working directory and
-with `OPP_PROJECT_ROOT` set to the project root, so the script can locate the
-implementation regardless of where `opp` was invoked from.
+`opp test` runs `.opp/test/test.sh` from the **project root** (the directory
+that contains `.opp/`), so the script sees the implementation at the same paths
+the design used — e.g. `bash hello.sh`. `OPP_PROJECT_ROOT` is also exported (the
+absolute project root) for scripts that change directories.
 
 ## Install
 
